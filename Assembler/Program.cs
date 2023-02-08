@@ -31,6 +31,19 @@ try
     while (!reader.EndOfStream)
     {
         string line = reader.ReadLine();
+        if (line.Contains(":"))
+        {
+            labels.Add(line.Trim().Replace(":", ""), pc);
+        }
+        else pc++;
+    }
+    
+    reader.Close();
+    reader = new StreamReader(filePath);
+
+    while (!reader.EndOfStream)
+    {
+        string line = reader.ReadLine();
         line = processLine(line);
         writer.Write(line);
         writer.Write(" ");
@@ -50,11 +63,7 @@ finally
 string processLine(string line)
 {
     if (line.Contains(":"))
-    {
-        labels.Add(line.Trim().Replace(":", ""), pc);
         return "";
-    }
-    pc++;
 
     var lnargs = line.Trim().Split(" ", 
         StringSplitOptions.RemoveEmptyEntries);
@@ -122,16 +131,31 @@ string processLine(string line)
                 return $"22{hex(lnargs[1])}{hex(lnargs[2])}";
             else if (lnargs[1].Contains("$") && lnargs[2].Contains("$"))
                 return $"20{hex(lnargs[1])}{hex(lnargs[2])}";
-            else return $"2{hex(lnargs[1])}{hex(lnargs[2])}";
+            else return $"3{hex(lnargs[1])}{hex(lnargs[2], 2)}";
             
         case "call":
             return $"e{hex(lnargs[1])}";
         
         case "ret":
             return $"ffff";
+        
+        case "jump":
+            return $"8{hex(labels[lnargs[1]].ToString(), 3)}";
+        
+        case "je":
+            return $"9{hex(labels[lnargs[1]].ToString(), 3)}";
+        
+        case "jne":
+            return $"a{hex(labels[lnargs[1]].ToString(), 3)}";
+        
+        case "jg":
+            return $"b{hex(labels[lnargs[1]].ToString(), 3)}";
+        
+        case "jge":
+            return $"c{hex(labels[lnargs[1]].ToString(), 3)}";
     }
 
-    string hex(string str)
+    string hex(string str, int d = 1)
     {
         str = str
             .Replace("$", "")
@@ -140,10 +164,11 @@ string processLine(string line)
             .Replace("]", "");
         var value = int.Parse(str);
         var r = "";
-        while (value > 0)
+        while (d > 0)
         {
-            r += inttohex(value % 16);
+            r = inttohex(value % 16) + r;
             value /= 16;
+            d--;
         }
         if (r == "")
             r = "0";
