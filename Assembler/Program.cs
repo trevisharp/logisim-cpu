@@ -31,6 +31,7 @@ try
     while (!reader.EndOfStream)
     {
         string line = reader.ReadLine();
+        line = string.Concat(line.TakeWhile(c => c != ';'));
         if (line.Contains(":"))
             labels.Add(line.Trim().Replace(":", ""), pc);
         else if (line.Trim() != string.Empty) pc++;
@@ -154,10 +155,10 @@ string processLine(string line)
         case "jne":
             return $"a{hex(labels[lnargs[1]].ToString(), 3)}";
         
-        case "jg":
+        case "jb":
             return $"b{hex(labels[lnargs[1]].ToString(), 3)}";
         
-        case "jge":
+        case "jbe":
             return $"c{hex(labels[lnargs[1]].ToString(), 3)}";
     }
 
