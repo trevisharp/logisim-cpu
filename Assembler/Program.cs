@@ -44,7 +44,12 @@ try
     while (!reader.EndOfStream)
     {
         string line = reader.ReadLine();
+        line = string.Concat(line.TakeWhile(c => c != ';'));
         line = processLine(line);
+
+        if (line == string.Empty)
+            continue;
+
         writer.Write(line);
         writer.Write(" ");
     }
@@ -67,6 +72,9 @@ string processLine(string line)
 
     var lnargs = line.Trim().Split(" ", 
         StringSplitOptions.RemoveEmptyEntries);
+    
+    if (lnargs.Length == 0)
+        return "";
 
     switch (lnargs[0])
     {
@@ -134,12 +142,12 @@ string processLine(string line)
             else return $"3{hex(lnargs[1])}{hex(lnargs[2], 2)}";
             
         case "call":
-            return $"e{hex(lnargs[1])}";
+            return $"e{hex(labels[lnargs[1]].ToString(), 3)}";
         
         case "ret":
             return $"ffff";
         
-        case "jump":
+        case "jmp":
             return $"8{hex(labels[lnargs[1]].ToString(), 3)}";
         
         case "je":
