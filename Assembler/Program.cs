@@ -32,10 +32,8 @@ try
     {
         string line = reader.ReadLine();
         if (line.Contains(":"))
-        {
             labels.Add(line.Trim().Replace(":", ""), pc);
-        }
-        else pc++;
+        else if (line.Trim() != string.Empty) pc++;
     }
     
     reader.Close();
